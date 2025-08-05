@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-const API_BASE = 'http://localhost:5005/api';
+// 可以选择使用不同的API端点
+const API_BASE = 'http://localhost:5007/api'; // 数据库版本
+// const API_BASE = 'http://localhost:5005/api'; // 内存版本
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -118,26 +120,35 @@ function App() {
     // 漏洞1: 搜索用户（包括密码）
     if (searchQuery) {
       try {
-        const response = await fetch(`${API_BASE}/search?q=${searchQuery}`);
+        const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(searchQuery)}`);
         const data = await response.json();
-        alert(`Search results: ${JSON.stringify(data.results, null, 2)}`);
+        alert(`Search results: ${JSON.stringify(data, null, 2)}`);
       } catch (error) {
         console.error('Search error:', error);
       }
     }
 
-    // 漏洞2: 路径遍历
-    if (filename) {
+    // 漏洞2: 高级SQL注入
+    if (searchQuery) {
       try {
-        const response = await fetch(`${API_BASE}/file?filename=${filename}`);
+        const response = await fetch(`${API_BASE}/advanced-search?q=${encodeURIComponent(searchQuery)}`);
         const data = await response.json();
-        alert(`File access attempt: ${JSON.stringify(data, null, 2)}`);
+        alert(`Advanced search results: ${JSON.stringify(data, null, 2)}`);
       } catch (error) {
-        console.error('File access error:', error);
+        console.error('Advanced search error:', error);
       }
     }
 
-    // 漏洞3: 修改任意用户余额
+    // 漏洞3: 数据库信息泄露
+    try {
+      const response = await fetch(`${API_BASE}/db-info`);
+      const data = await response.json();
+      alert(`Database info: ${JSON.stringify(data, null, 2)}`);
+    } catch (error) {
+      console.error('Database info error:', error);
+    }
+
+    // 漏洞4: 修改任意用户余额
     if (newBalance) {
       try {
         const response = await fetch(`${API_BASE}/update-balance`, {
@@ -159,7 +170,7 @@ function App() {
       }
     }
 
-    // 漏洞4: 重置任意用户密码
+    // 漏洞5: 重置任意用户密码
     if (newPassword) {
       try {
         const response = await fetch(`${API_BASE}/reset-password`, {
@@ -184,9 +195,9 @@ function App() {
     return (
       <div className="App">
         <div className="login-container">
-          <h1>⚠️ Insecure Crypto Exchange</h1>
+          <h1>⚠️ Insecure Crypto Exchange (Database Version)</h1>
           <div className="warning-banner">
-            <strong>⚠️ WARNING: This application contains multiple security vulnerabilities for educational purposes!</strong>
+            <strong>⚠️ WARNING: This application contains REAL SQL injection vulnerabilities for educational purposes!</strong>
           </div>
           <form onSubmit={handleLogin} className="login-form">
             <h2>Login (No Security)</h2>
@@ -214,7 +225,9 @@ function App() {
             <p className="login-info">
               <strong>Demo Accounts:</strong><br />
               Username: user1, Password: password<br />
-              Username: admin, Password: admin123
+              Username: admin, Password: admin123<br />
+              Username: alice, Password: alice123<br />
+              Username: bob, Password: bob456
             </p>
           </form>
         </div>
@@ -225,12 +238,12 @@ function App() {
   return (
     <div className="App">
       <header className="header">
-        <h1>⚠️ Insecure Crypto Exchange</h1>
+        <h1>⚠️ Insecure Crypto Exchange (Database Version)</h1>
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </header>
 
       <div className="warning-banner">
-        <strong>⚠️ VULNERABILITIES DEMONSTRATION - Educational Purposes Only!</strong>
+        <strong>⚠️ REAL SQL INJECTION VULNERABILITIES - Educational Purposes Only!</strong>
       </div>
 
       <div className="main-content">
@@ -319,24 +332,15 @@ function App() {
         </div>
 
         <div className="vulnerabilities-section">
-          <h2>🔓 Vulnerability Demonstrations</h2>
+          <h2>🔓 SQL Injection Demonstrations</h2>
           <div className="vulnerability-form">
             <div className="form-group">
-              <label>Search Users (including passwords):</label>
+              <label>SQL Injection Search:</label>
               <input
                 type="text"
                 value={vulnerabilityForm.searchQuery}
                 onChange={(e) => setVulnerabilityForm({ ...vulnerabilityForm, searchQuery: e.target.value })}
-                placeholder="Enter search term"
-              />
-            </div>
-            <div className="form-group">
-              <label>Path Traversal:</label>
-              <input
-                type="text"
-                value={vulnerabilityForm.filename}
-                onChange={(e) => setVulnerabilityForm({ ...vulnerabilityForm, filename: e.target.value })}
-                placeholder="e.g., ../../../etc/passwd"
+                placeholder="Try: ' OR '1'='1 or ' UNION SELECT * FROM users --"
               />
             </div>
             <div className="form-group">
@@ -367,7 +371,7 @@ function App() {
               />
             </div>
             <button onClick={demonstrateVulnerabilities} className="vulnerability-btn">
-              🔓 Demonstrate Vulnerabilities
+              🔓 Demonstrate SQL Injection
             </button>
           </div>
         </div>
@@ -383,7 +387,7 @@ function App() {
                 </div>
                 <div className="user-details">
                   <span className="user-password">Password: {user.password}</span>
-                  <span className="user-balance">USD: {user.balance.USD}</span>
+                  <span className="user-balance">USD: {user.usd_balance}</span>
                 </div>
               </div>
             ))}
@@ -397,12 +401,12 @@ function App() {
               <div key={tx.id} className="transaction-item">
                 <div className="tx-header">
                   <span className="tx-id">#{tx.id}</span>
-                  <span className="tx-user">User: {tx.userId}</span>
+                  <span className="tx-user">User: {tx.user_id}</span>
                   <span className="tx-date">{new Date(tx.timestamp).toLocaleString()}</span>
                 </div>
                 <div className="tx-details">
                   <span className="tx-amount">
-                    {tx.amount} {tx.fromCurrency} → {tx.convertedAmount.toFixed(4)} {tx.toCurrency}
+                    {tx.amount} {tx.from_currency} → {tx.converted_amount.toFixed(4)} {tx.to_currency}
                   </span>
                 </div>
               </div>

