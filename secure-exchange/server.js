@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5003;
 const JWT_SECRET = 'your-super-secret-jwt-key-change-in-production';
 
 // 安全中间件
