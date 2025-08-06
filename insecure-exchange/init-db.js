@@ -53,6 +53,7 @@ db.serialize(() => {
       to_currency TEXT NOT NULL,
       amount REAL NOT NULL,
       converted_amount REAL NOT NULL,
+      note TEXT,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users (id)
     )

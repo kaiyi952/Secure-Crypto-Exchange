@@ -213,6 +213,439 @@
   background: #ff3742;
 }
 
+/* XSS Section Styles */
+.xss-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  grid-column: 1 / -1;
+}
+
+.xss-section h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #fff;
+  text-align: center;
+}
+
+.xss-form {
+  display: grid;
+  gap: 2rem;
+}
+
+.xss-type {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.xss-type h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.xss-btn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  transition: all 0.3s ease;
+}
+
+.xss-btn:hover {
+  background: #ff3742;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+}
+
+.xss-examples {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.xss-examples h4 {
+  margin-top: 0;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.xss-examples ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.xss-examples li {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+.xss-examples code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #ffd700;
+}
+
+/* 真实应用场景样式 */
+.real-applications-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  grid-column: 1 / -1;
+}
+
+.real-applications-section h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  text-align: center;
+}
+
+.app-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-section h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+/* 搜索功能样式 */
+.search-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.search-btn {
+  background: #2ecc71;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.search-btn:hover {
+  background: #27ae60;
+}
+
+.search-results {
+  margin-top: 1rem;
+}
+
+.product-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.warning-note {
+  color: #ff4757;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+/* 评论功能样式 */
+.comment-form {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.comment-input {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.comment-textarea {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rating-container select {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.comment-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.comment-btn:hover {
+  background: #2980b9;
+}
+
+.xss-demo-btn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  transition: all 0.3s ease;
+}
+
+.xss-demo-btn:hover {
+  background: #ff3742;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+}
+
+.comments-list {
+  margin-top: 1rem;
+}
+
+.comment-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.comment-date {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+.comment-content {
+  line-height: 1.5;
+}
+
+/* 价格比较样式 */
+.price-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.price-form select,
+.price-form input,
+.price-input {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.price-btn {
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.price-btn:hover {
+  background: #e67e22;
+}
+
+/* 用户资料样式 */
+.profile-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.profile-btn {
+  background: #9b59b6;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.profile-btn:hover {
+  background: #8e44ad;
+}
+
+/* 漏洞提示样式 */
+.vulnerability-tip {
+  background: rgba(255, 71, 87, 0.2);
+  border: 1px solid rgba(255, 71, 87, 0.5);
+  border-radius: 5px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.vulnerability-tip code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #ffd700;
+}
+
+/* 交易查询样式 */
+.trade-query-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.query-input {
+  width: 100px;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.query-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.query-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.query-btn:hover {
+  background: #c0392b;
+}
+
+.query-results {
+  margin-top: 1rem;
+}
+
+.query-result-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.result-date {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+.result-details {
+  line-height: 1.5;
+}
+
+.result-note {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 71, 87, 0.2);
+  border-radius: 3px;
+  font-style: italic;
+}
+
+.trade-note-input {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.trade-note-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .users-list {
   max-height: 300px;
   overflow-y: auto;

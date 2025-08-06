@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// 可以选择使用不同的API端点
-const API_BASE = 'http://localhost:5007/api'; // 数据库版本
-// const API_BASE = 'http://localhost:5005/api'; // 内存版本
+// API端点配置
+const API_BASE = 'http://localhost:5007/api';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,7 +11,13 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
-  const [tradeForm, setTradeForm] = useState({ userId: 1, fromCurrency: 'USD', toCurrency: 'BTC', amount: '' });
+  const [tradeForm, setTradeForm] = useState({
+    userId: 1,
+    fromCurrency: 'USD',
+    toCurrency: 'BTC',
+    amount: '',
+    customNote: ''
+  });
   const [vulnerabilityForm, setVulnerabilityForm] = useState({
     searchQuery: '',
     filename: '',
@@ -20,6 +25,36 @@ function App() {
     newBalance: 1000000,
     newPassword: 'hacked'
   });
+  const [xssForm, setXssForm] = useState({
+    reflectedInput: '',
+    storedMessage: '',
+    storedUsername: '',
+    domData: '',
+    profileBio: '',
+    profileDisplayName: ''
+  });
+  const [productSearch, setProductSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [commentForm, setCommentForm] = useState({
+    username: '',
+    comment: '',
+    rating: 5
+  });
+  const [comments, setComments] = useState([]);
+  const [priceComparison, setPriceComparison] = useState({
+    crypto: 'BTC',
+    fiat: 'USD',
+    amount: 1
+  });
+  const [tradeQueryForm, setTradeQueryForm] = useState({
+    userId: '',
+    currency: '',
+    minAmount: '',
+    maxAmount: '',
+    dateFrom: '',
+    dateTo: ''
+  });
+  const [tradeQueryResults, setTradeQueryResults] = useState([]);
 
   useEffect(() => {
     fetchPrices();
@@ -191,16 +226,138 @@ function App() {
     }
   };
 
+
+  const searchProducts = async () => {
+    if (!productSearch.trim()) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/products/search?q=${encodeURIComponent(productSearch)}`);
+      const data = await response.json();
+      setSearchResults(data.results);
+
+
+      if (productSearch.includes("'") || productSearch.includes('"') || productSearch.includes('--')) {
+        alert('⚠️ SQL Injection detected! In a real application, this could expose database information.');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    }
+  };
+
+  // 添加商品评论 - 存储型XSS演示
+  const addComment = async () => {
+    if (!commentForm.comment.trim()) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/products/1/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(commentForm)
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Comment added! Note: This comment system has a stored XSS vulnerability.');
+        setCommentForm({ username: '', comment: '', rating: 5 });
+        fetchComments();
+      }
+    } catch (error) {
+      console.error('Comment error:', error);
+    }
+  };
+
+  // 获取评论
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/products/1/comments`);
+      const data = await response.json();
+      setComments(data.comments);
+    } catch (error) {
+      console.error('Fetch comments error:', error);
+    }
+  };
+
+  // 价格比较功能 - 反射型XSS演示
+  const openPriceComparison = () => {
+    const { crypto, fiat, amount } = priceComparison;
+    const url = `${API_BASE}/price-comparison?crypto=${encodeURIComponent(crypto)}&fiat=${encodeURIComponent(fiat)}&amount=${encodeURIComponent(amount)}`;
+    window.open(url, '_blank');
+  };
+
+  // 用户资料页面 - DOM型XSS演示
+  const openUserProfile = () => {
+    const { domData } = xssForm;
+    let url = `${API_BASE}/user-profile?userId=1&theme=light`;
+    if (domData) {
+      url += `&content=${encodeURIComponent(domData)}`;
+    }
+    window.open(url, '_blank');
+  };
+
+  // 查看评论XSS演示页面
+  const viewCommentsXSS = () => {
+    const url = `${API_BASE}/comments-view`;
+    window.open(url, '_blank');
+  };
+
+  // 交易查询 - SQL注入演示
+  const queryTrades = async () => {
+    const { userId, currency, minAmount, maxAmount, dateFrom, dateTo } = tradeQueryForm;
+
+    try {
+      const params = new URLSearchParams();
+      if (userId) params.append('userId', userId);
+      if (currency) params.append('currency', currency);
+      if (minAmount) params.append('minAmount', minAmount);
+      if (maxAmount) params.append('maxAmount', maxAmount);
+      if (dateFrom) params.append('dateFrom', dateFrom);
+      if (dateTo) params.append('dateTo', dateTo);
+
+      const url = `${API_BASE}/trade-query?${params.toString()}`;
+      console.log('Querying URL:', url);
+
+      // 测试连接
+      const testResponse = await fetch(`${API_BASE}/transactions`);
+      console.log('Test response status:', testResponse.status);
+
+      const response = await fetch(url);
+      console.log('Query response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (data.transactions) {
+        setTradeQueryResults(data.transactions);
+        alert(`Query executed: ${data.query}\n\nFound ${data.transactions.length} transactions.`);
+      } else if (data.error) {
+        alert(`Error: ${data.error}\n\nQuery: ${data.query || 'N/A'}\n\nDetails: ${data.details || 'N/A'}`);
+      } else {
+        alert(`Unexpected response: ${JSON.stringify(data, null, 2)}`);
+      }
+    } catch (error) {
+      console.error('Trade query error:', error);
+      alert(`Query failed: ${error.message}\n\nPlease check the browser console for more details.`);
+    }
+  };
+
+  // 加载评论
+  useEffect(() => {
+    fetchComments();
+  }, []);
+
   if (!isLoggedIn) {
     return (
       <div className="App">
         <div className="login-container">
-          <h1>⚠️ Insecure Crypto Exchange (Database Version)</h1>
-          <div className="warning-banner">
-            <strong>⚠️ WARNING: This application contains REAL SQL injection vulnerabilities for educational purposes!</strong>
-          </div>
+          <h1>⚠️ Insecure Crypto Exchange</h1>
+
           <form onSubmit={handleLogin} className="login-form">
-            <h2>Login (No Security)</h2>
+            <h2>Login</h2>
             <div className="form-group">
               <label>Username:</label>
               <input
@@ -279,140 +436,154 @@ function App() {
           </div>
         </div>
 
-        <div className="trade-section">
-          <h2>💱 Trade (No Authentication)</h2>
-          <form onSubmit={handleTrade} className="trade-form">
-            <div className="form-group">
-              <label>User ID (Can trade for anyone):</label>
-              <input
-                type="number"
-                value={tradeForm.userId}
-                onChange={(e) => setTradeForm({ ...tradeForm, userId: parseInt(e.target.value) })}
-                placeholder="Enter user ID"
-                required
-              />
+
+
+        {/* 交易查询 - SQL注入演示 */}
+        <div className="app-section">
+          <h3>🔍 Trade Query (SQL Injection)</h3>
+          <div className="trade-query-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label>User ID (Numeric Injection):</label>
+                <input
+                  type="text"
+                  value={tradeQueryForm.userId}
+                  onChange={(e) => setTradeQueryForm({ ...tradeQueryForm, userId: e.target.value })}
+                  placeholder="Try: 1 OR 1=1 (no quotes needed)"
+                  className="query-input"
+                />
+              </div>
+              <div className="form-group">
+                <label>Currency (String Injection):</label>
+                <input
+                  type="text"
+                  value={tradeQueryForm.currency}
+                  onChange={(e) => setTradeQueryForm({ ...tradeQueryForm, currency: e.target.value })}
+                  placeholder="Try: ' OR '1'='1 (quotes needed)"
+                  className="query-input"
+                />
+              </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>From:</label>
-                <select
-                  value={tradeForm.fromCurrency}
-                  onChange={(e) => setTradeForm({ ...tradeForm, fromCurrency: e.target.value })}
-                >
-                  <option value="USD">USD</option>
-                  <option value="BTC">BTC</option>
-                  <option value="ETH">ETH</option>
-                </select>
+                <label>Min Amount (Numeric Injection):</label>
+                <input
+                  type="text"
+                  value={tradeQueryForm.minAmount}
+                  onChange={(e) => setTradeQueryForm({ ...tradeQueryForm, minAmount: e.target.value })}
+                  placeholder="Try: 0 OR 1=1 (no quotes needed)"
+                  className="query-input"
+                />
               </div>
               <div className="form-group">
-                <label>To:</label>
+                <label>Max Amount (Numeric Injection):</label>
+                <input
+                  type="text"
+                  value={tradeQueryForm.maxAmount}
+                  onChange={(e) => setTradeQueryForm({ ...tradeQueryForm, maxAmount: e.target.value })}
+                  placeholder="Try: 999999 OR 1=1 (no quotes needed)"
+                  className="query-input"
+                />
+              </div>
+            </div>
+            <button onClick={queryTrades} className="query-btn">Execute Query</button>
+          </div>
+
+          {tradeQueryResults.length > 0 && (
+            <div className="query-results">
+              <h4>Query Results:</h4>
+              {tradeQueryResults.map((tx) => (
+                <div key={tx.id} className="query-result-item">
+                  <div className="result-header">
+                    <strong>Transaction #{tx.id}</strong>
+                    <span className="result-date">{new Date(tx.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div className="result-details">
+                    User {tx.user_id}: {tx.amount} {tx.from_currency} → {tx.converted_amount} {tx.to_currency}
+                    {tx.note && <div className="result-note">Note: {tx.note}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="vulnerability-tip">
+            💡 SQL Injection Examples:
+            <ul>
+              <li><strong>Numeric Injection (User ID, Min/Max Amount):</strong></li>
+              <li><code>1 OR 1=1</code> - Show all transactions</li>
+              <li><code>1; DROP TABLE transactions; --</code> - Delete transactions table</li>
+              <li><code>1 UNION SELECT * FROM users --</code> - Union attack</li>
+              <li><strong>String Injection (Currency):</strong></li>
+              <li><code>' OR '1'='1</code> - Show all transactions</li>
+              <li><code>'; DROP TABLE transactions; --</code> - Delete transactions table</li>
+              <li><code>' UNION SELECT * FROM users --</code> - Union attack</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="real-applications-section">
+
+
+
+
+          {/* 商品评论 - 存储型XSS */}
+          <div className="app-section">
+            <h3>💬 Product Comments (Stored XSS)</h3>
+            <div className="comment-form">
+              <input
+                type="text"
+                value={commentForm.username}
+                onChange={(e) => setCommentForm({ ...commentForm, username: e.target.value })}
+                placeholder="Your name"
+                className="comment-input"
+              />
+              <textarea
+                value={commentForm.comment}
+                onChange={(e) => setCommentForm({ ...commentForm, comment: e.target.value })}
+                placeholder="Write your comment..."
+                className="comment-textarea"
+              />
+              <div className="rating-container">
+                <label>Rating: </label>
                 <select
-                  value={tradeForm.toCurrency}
-                  onChange={(e) => setTradeForm({ ...tradeForm, toCurrency: e.target.value })}
+                  value={commentForm.rating}
+                  onChange={(e) => setCommentForm({ ...commentForm, rating: parseInt(e.target.value) })}
                 >
-                  <option value="BTC">BTC</option>
-                  <option value="ETH">ETH</option>
-                  <option value="USD">USD</option>
+                  {[1, 2, 3, 4, 5].map(r => <option key={r} value={r}>{r} ⭐</option>)}
                 </select>
               </div>
+              <button onClick={addComment} className="comment-btn">Add Comment</button>
             </div>
-            <div className="form-group">
-              <label>Amount:</label>
-              <input
-                type="number"
-                step="0.01"
-                value={tradeForm.amount}
-                onChange={(e) => setTradeForm({ ...tradeForm, amount: e.target.value })}
-                placeholder="Enter amount"
-                required
-              />
-            </div>
-            <button type="submit">Execute Trade (No Auth)</button>
-          </form>
-        </div>
 
-        <div className="vulnerabilities-section">
-          <h2>🔓 SQL Injection Demonstrations</h2>
-          <div className="vulnerability-form">
-            <div className="form-group">
-              <label>SQL Injection Search:</label>
-              <input
-                type="text"
-                value={vulnerabilityForm.searchQuery}
-                onChange={(e) => setVulnerabilityForm({ ...vulnerabilityForm, searchQuery: e.target.value })}
-                placeholder="Try: ' OR '1'='1 or ' UNION SELECT * FROM users --"
-              />
+            <div className="comments-list">
+              <h4>Comment List:</h4>
+              {comments.map((comment) => (
+                <div key={comment.id} className="comment-item">
+                  <div className="comment-header">
+                    <strong>{comment.username}</strong> - {comment.rating}⭐
+                    <span className="comment-date">{new Date(comment.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div className="comment-content" dangerouslySetInnerHTML={{ __html: comment.comment }} />
+                </div>
+              ))}
             </div>
-            <div className="form-group">
-              <label>Target User ID for Balance Hack:</label>
-              <input
-                type="number"
-                value={vulnerabilityForm.targetUserId}
-                onChange={(e) => setVulnerabilityForm({ ...vulnerabilityForm, targetUserId: parseInt(e.target.value) })}
-                placeholder="User ID"
-              />
-            </div>
-            <div className="form-group">
-              <label>New Balance Amount:</label>
-              <input
-                type="number"
-                value={vulnerabilityForm.newBalance}
-                onChange={(e) => setVulnerabilityForm({ ...vulnerabilityForm, newBalance: parseInt(e.target.value) })}
-                placeholder="New balance"
-              />
-            </div>
-            <div className="form-group">
-              <label>New Password for Admin:</label>
-              <input
-                type="text"
-                value={vulnerabilityForm.newPassword}
-                onChange={(e) => setVulnerabilityForm({ ...vulnerabilityForm, newPassword: e.target.value })}
-                placeholder="New password"
-              />
-            </div>
-            <button onClick={demonstrateVulnerabilities} className="vulnerability-btn">
-              🔓 Demonstrate SQL Injection
+
+            <button onClick={viewCommentsXSS} className="xss-demo-btn">
+              🚨 View the real XSS demo page
             </button>
+            <div className="vulnerability-tip">
+              💡 Try XSS: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> or <code>&lt;img src=x onerror=alert('XSS')&gt;</code>
+            </div>
           </div>
+
+
+
+
         </div>
 
-        <div className="users-section">
-          <h2>👥 All Users (Exposed)</h2>
-          <div className="users-list">
-            {allUsers.map((user) => (
-              <div key={user.id} className="user-item">
-                <div className="user-header">
-                  <span className="user-id">ID: {user.id}</span>
-                  <span className="user-name">{user.username}</span>
-                </div>
-                <div className="user-details">
-                  <span className="user-password">Password: {user.password}</span>
-                  <span className="user-balance">USD: {user.usd_balance}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="transactions-section">
-          <h2>📋 All Transactions (Exposed)</h2>
-          <div className="transactions-list">
-            {transactions.map((tx) => (
-              <div key={tx.id} className="transaction-item">
-                <div className="tx-header">
-                  <span className="tx-id">#{tx.id}</span>
-                  <span className="tx-user">User: {tx.user_id}</span>
-                  <span className="tx-date">{new Date(tx.timestamp).toLocaleString()}</span>
-                </div>
-                <div className="tx-details">
-                  <span className="tx-amount">
-                    {tx.amount} {tx.from_currency} → {tx.converted_amount.toFixed(4)} {tx.to_currency}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
       </div>
     </div>
   );

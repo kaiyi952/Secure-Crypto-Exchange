@@ -2,10 +2,10 @@
   "name": "insecure-crypto-exchange",
   "version": "1.0.0",
   "description": "Insecure cryptocurrency exchange (for educational purposes)",
-  "main": "server.js",
+  "main": "server-with-db.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node server-with-db.js",
+    "dev": "nodemon server-with-db.js",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
     "init-db": "node init-db.js"

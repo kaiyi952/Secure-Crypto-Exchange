@@ -33,19 +33,38 @@
   background: #ff3742;
 }
 
+.security-banner {
+  background: #27ae60;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 3px solid #2ecc71;
+}
+
+.warning-banner {
+  background: #e74c3c;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 3px solid #c0392b;
+}
+
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
 }
 
 .balance-section,
 .prices-section,
 .trade-section,
-.transactions-section {
+.transactions-section,
+.app-section {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 1.5rem;
@@ -56,7 +75,9 @@
 .balance-section h2,
 .prices-section h2,
 .trade-section h2,
-.transactions-section h2 {
+.transactions-section h2,
+.app-section h2,
+.app-section h3 {
   margin-top: 0;
   margin-bottom: 1rem;
   color: #fff;
@@ -114,7 +135,10 @@
   color: #ff4757;
 }
 
-.trade-form {
+.trade-form,
+.trade-query-form,
+.vulnerability-form,
+.comment-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -138,7 +162,8 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   padding: 0.75rem;
   border: none;
   border-radius: 5px;
@@ -148,12 +173,34 @@
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
-.trade-form button {
+.query-input,
+.vuln-input,
+.comment-input,
+.comment-textarea {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.comment-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.trade-form button,
+.query-btn,
+.vuln-btn,
+.comment-btn {
   background: #2ed573;
   color: white;
   border: none;
@@ -165,11 +212,31 @@
   margin-top: 1rem;
 }
 
-.trade-form button:hover {
+.trade-form button:hover,
+.query-btn:hover,
+.vuln-btn:hover,
+.comment-btn:hover {
   background: #26d0a8;
 }
 
-.transactions-list {
+.xss-demo-btn {
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.xss-demo-btn:hover {
+  background: #e67e22;
+}
+
+.transactions-list,
+.users-list,
+.comments-list {
   max-height: 300px;
   overflow-y: auto;
   display: flex;
@@ -177,7 +244,9 @@
   gap: 0.5rem;
 }
 
-.transaction-item {
+.transaction-item,
+.user-item,
+.comment-item {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   padding: 1rem;
@@ -185,7 +254,8 @@
   text-align: left;
 }
 
-.tx-header {
+.tx-header,
+.comment-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
@@ -200,6 +270,148 @@
 .tx-amount {
   font-weight: bold;
   color: #2ed573;
+}
+
+.tx-note {
+  margin-top: 0.5rem;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.user-id {
+  font-weight: bold;
+  color: #3498db;
+}
+
+.user-name {
+  margin-left: 1rem;
+}
+
+.comment-content {
+  line-height: 1.6;
+}
+
+.comment-date {
+  color: #95a5a6;
+  font-size: 0.8rem;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-container label {
+  margin: 0;
+}
+
+.rating-container select {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+.query-results {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.query-result-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.result-details {
+  font-weight: bold;
+  color: #2ed573;
+}
+
+.result-note {
+  margin-top: 0.5rem;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.security-info,
+.vulnerability-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.security-info {
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.vulnerability-info {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.security-tip,
+.vulnerability-tip {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.security-tip {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.vulnerability-tip {
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.security-tip ul,
+.vulnerability-tip ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.security-tip li,
+.vulnerability-tip li {
+  margin-bottom: 0.25rem;
+}
+
+.security-tip code,
+.vulnerability-tip code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.real-applications-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 /* Login styles */
@@ -259,7 +471,6 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .main-content {
-    grid-template-columns: 1fr;
     padding: 1rem;
   }
   
@@ -274,5 +485,11 @@
   
   .header h1 {
     font-size: 1.5rem;
+  }
+  
+  .security-banner,
+  .warning-banner {
+    font-size: 0.9rem;
+    padding: 0.75rem;
   }
 }
